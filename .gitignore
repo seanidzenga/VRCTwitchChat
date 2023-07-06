@@ -70,3 +70,9 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# Assets from the unity store
+/[Aa]ssets/TextMesh Pro/*
+/[Aa]ssets/UdonSharp/*
+/[Aa]ssets/UdonSharp.meta
+/[Pp]ackages/com.vrchat.core.vpm-resolver/*
