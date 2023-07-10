@@ -14,11 +14,9 @@ namespace TwitchChat
         [SerializeField]
         private float interval = 5f;
         [SerializeField]
-        private TwitchChatUIController UIController;
+        private TwitchChatUIController[] UIControllers;
 
-        // TODO - would be nice if we could have a serialized field for our endpoint
-        private readonly VRCUrl AllMessagesURL = new VRCUrl("http://localhost:3000/messages");
-        private readonly VRCUrl subfrequenciesURL = new VRCUrl("http://localhost:3000/messages/subfrequencies");
+        private readonly VRCUrl MessagesURL = new VRCUrl("http://localhost:3000/messages");
         private float time = 0.0f;
         private int lastHash;
 
@@ -46,15 +44,6 @@ namespace TwitchChat
             }
         }
 
-        private void FetchMessages()
-        {
-            //Debug.Log("fetching ALL messages...");
-            //VRCStringDownloader.LoadUrl(AllMessagesURL, (IUdonEventReceiver)this);
-
-            Debug.Log("fetching messages from subfrequencies...");
-            VRCStringDownloader.LoadUrl(subfrequenciesURL, (IUdonEventReceiver)this);
-        }
-
         public override void OnStringLoadSuccess(IVRCStringDownload download)
         {
             string json = download.Result;
@@ -67,7 +56,10 @@ namespace TwitchChat
                 {
                     if (result.DataDictionary.TryGetValue(usersToken, out DataToken users))
                     {
-                        UIController.UpdateUsers(users.DataDictionary);
+                        foreach(TwitchChatUIController controller in UIControllers)
+                        {
+                            controller.UpdateUsers(users.DataDictionary);
+                        }
                     }
 
                     // now we have to determine which form has been loaded, if this is all messages
@@ -76,11 +68,17 @@ namespace TwitchChat
                     // specific channel however we'll have a "messages" property at this level
                     if (result.DataDictionary.TryGetValue(channelsToken, out DataToken channels))
                     {
-                        UIController.UpdateMessages(channels.DataDictionary);
+                        foreach(TwitchChatUIController controller in UIControllers)
+                        {
+                            controller.UpdateMessages(channels.DataDictionary);
+                        }
                     }
                     else if (result.DataDictionary.TryGetValue(messagesToken, out DataToken messages))
                     {
-                        UIController.UpdateMessages(messages.DataList);
+                        foreach (TwitchChatUIController controller in UIControllers)
+                        {
+                            controller.UpdateMessages(messages.DataList);
+                        }
                     }
                 }
             } 
@@ -97,7 +95,12 @@ namespace TwitchChat
             Debug.Log("Error when loading a string!");
             Debug.Log(result);
 
-            // should do something nicer for the UI
+            // TODO - should do something nicer for the UI
+        }
+
+        private void FetchMessages()
+        {
+            VRCStringDownloader.LoadUrl(MessagesURL, (IUdonEventReceiver)this);
         }
     }
 }
